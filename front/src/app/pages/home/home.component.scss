@@ -1,7 +1,53 @@
-.center {
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
+/* conteneur central */
+.container { width: min(1100px, 92vw); margin-inline: auto; }
+
+/* ===== Landing ===== (inchangé) */
+.landing { min-height: 100svh; display: grid; place-items: center; padding: 24px; }
+.landing__box { width: min(920px, 92vw); display: grid; justify-items: center; row-gap: 28px; }
+.landing__logo { width: clamp(180px, 38vw, 520px); height: auto; display: block; }
+.landing__actions { display: flex; gap: 16px; align-items: center; justify-content: center; flex-wrap: wrap; }
+.btn { border-radius: 10px; padding: 10px 18px; line-height: 1; text-decoration: none; }
+@media (max-width: 640px) { .landing__actions { flex-direction: column; gap: 12px; } .btn { width: 220px; text-align: center; } }
+
+
+
+@media (min-width: 900px) { .topnav { display: flex; } }
+
+/* ===== Toolbar (CTA gauche, tri à droite avec SEULE la flèche) ===== */
+.toolbar {
+  display: flex; align-items: center; gap: 12px;
+  padding: 16px 0 10px;
 }
+.cta {
+  background: #7b61ff; color: #fff; text-decoration: none;
+  border: 1px solid #7b61ff; border-radius: 10px;
+  padding: 10px 18px; font-weight: 700; box-shadow: 0 2px 6px rgba(123,97,255,.25);
+}
+.toolbar__sort { margin-left: auto; display: flex; align-items: center; gap: 10px; }
+.sortlabel { color: #666; }
+.sortbtn {
+  width: 42px; height: 32px;               /* bouton compact */
+  display: inline-grid; place-items: center;
+  border: 1px solid #e0e0e0; background: #f4f4f7;
+  border-radius: 999px; cursor: pointer; font-size: 16px; line-height: 1;
+}
+
+/* ===== Grille & cartes ===== */
+.grid { list-style: none; padding: 0; margin: 0; display: grid; gap: 16px; }
+@media (min-width: 900px) { .grid { grid-template-columns: 1fr 1fr; } }
+
+.card {
+  background: #f3f3fb;                    /* gris clair type maquette */
+  border: 1px solid #e8e8f3;
+  border-radius: 12px;
+  padding: 16px;
+}
+.card__title { font-weight: 800; text-decoration: none; color: #222; }
+.card__meta { color: #7b7b86; font-size: 0.9rem; margin-top: 6px; }
+.card__excerpt { margin: 10px 0 0; white-space: pre-wrap; }
+.card__link { font-size: .92rem; }
+
+/* ===== Divers ===== */
+.muted { color: #777; text-align: center; margin: 16px 0; }
+.error { color: crimson; text-align: center; margin: 8px 0; }
+.pager { display: flex; gap: 8px; align-items: center; justify-content: center; margin: 18px 0 28px; }

@@ -1,0 +1,70 @@
+.newpost {
+    width: min(760px, 92vw);
+    margin: 16px auto 32px;
+  }
+  
+  .newpost__top {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+  }
+  .back {
+    background: none;
+    border: 0;
+    font-size: 24px;
+    line-height: 1;
+    cursor: pointer;
+  }
+  
+  .title {
+    text-align: center;
+    font-weight: 800;
+    font-size: clamp(20px, 2.6vw, 28px);
+    margin: 8px 0 18px;
+  }
+  
+  /* --- Formulaire --- */
+  .form {
+    display: grid;
+    gap: 16px;
+  }
+  
+  .field { display: grid; gap: 6px; }
+  
+  .control {
+    width: 100%;
+    padding: 12px 14px;
+    border: 2px solid #7b61ff;   /* violet comme la maquette */
+    border-radius: 10px;
+    font-size: 1rem;
+    outline: none;
+    background: #fff;
+    appearance: none;             /* pour un select propre */
+  }
+  .control:focus {
+    box-shadow: 0 0 0 3px rgba(123, 97, 255, 0.15);
+  }
+  /* textarea plus haut */
+  .control--textarea { min-height: 220px; resize: vertical; }
+  
+  /* messages d'erreur discrets */
+  .err {
+    color: #c62828;
+    font-size: 0.9rem;
+  }
+  
+  /* Bouton “Créer” centré */
+  .actions { display: grid; place-items: center; margin-top: 6px; }
+  .cta {
+    background: #7b61ff;
+    color: #fff;
+    border: 1px solid #7b61ff;
+    border-radius: 10px;
+    padding: 10px 26px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .cta:disabled { opacity: .6; cursor: not-allowed; }
+  
+  /* Responsive : rien de spécial à gérer, la mise en page est déjà fluide */
+  

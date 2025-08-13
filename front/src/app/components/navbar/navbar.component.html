@@ -1,0 +1,48 @@
+<header class="topbar">
+  <div class="container topbar__row">
+    <!-- Logo -->
+    <a routerLink="/" class="brand" aria-label="Accueil">
+      <img src="/assets/logo_p6.png" alt="MDD" />
+    </a>
+
+    <!-- Liens centrés (desktop) -->
+    <nav class="topnav">
+      <button *ngIf="isLogged" class="link link--danger" (click)="logout()">Se déconnecter</button>
+      <a class="link link--active" routerLink="/">Articles</a>
+      <a class="link" routerLink="/topics">Thèmes</a>
+    </nav>
+
+    <!-- Zone droite : avatar (desktop) + burger (mobile) -->
+    <div class="topbar__right">
+      <!-- ✅ avatar visible sur bureau -->
+      <a routerLink="/me" class="avatar avatar--desktop" aria-label="Profil">
+        <svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true">
+          <circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" stroke-width="2"></circle>
+          <path d="M4 20a8 8 0 0 1 16 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+        </svg>
+      </a>
+
+      <!-- burger visible uniquement mobile -->
+      <button class="burger" (click)="toggleMenu()" aria-label="Ouvrir le menu">≡</button>
+    </div>
+  </div>
+
+  <!-- Drawer mobile -->
+  <div class="drawer" *ngIf="menuOpen" (click)="closeMenu()">
+    <aside class="drawer__panel" (click)="$event.stopPropagation()">
+      <div class="drawer__content">
+        <button *ngIf="isLogged" class="drawer__link drawer__link--danger" (click)="logout()">Se déconnecter</button>
+        <a class="drawer__link" routerLink="/" (click)="closeMenu()">Articles</a>
+        <a class="drawer__link" routerLink="/topics" (click)="closeMenu()">Thèmes</a>
+      </div>
+
+      <!-- ✅ avatar visible en bas du menu mobile -->
+      <a routerLink="/me" class="drawer__profile" aria-label="Profil" (click)="closeMenu()">
+        <svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true">
+          <circle cx="12" cy="8" r="4" fill="none" stroke="currentColor" stroke-width="2"></circle>
+          <path d="M4 20a8 8 0 0 1 16 0" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
+        </svg>
+      </a>
+    </aside>
+  </div>
+</header>

@@ -1,0 +1,104 @@
+.profile {
+    width: min(960px, 92vw);
+    margin: 16px auto 32px;
+  }
+  
+  /* Titres */
+  .title {
+    text-align: center;
+    font-weight: 800;
+    font-size: clamp(20px, 2.6vw, 28px);
+    margin: 8px 0 18px;
+  }
+  .subtitle {
+    text-align: center;
+    font-weight: 800;
+    font-size: clamp(18px, 2.2vw, 24px);
+    margin: 10px 0 18px;
+  }
+  
+  /* Formulaire profil */
+  .form {
+    width: min(520px, 92vw);
+    margin: 0 auto 12px;
+    display: grid;
+    gap: 12px;
+  }
+  .control {
+    width: 100%;
+    padding: 12px 14px;
+    border: 2px solid #7b61ff;      /* violet comme la maquette */
+    border-radius: 10px;
+    font-size: 1rem;
+    outline: none;
+    background: #fff;
+  }
+  .control:disabled { opacity: .6; }
+  .control:focus { box-shadow: 0 0 0 3px rgba(123,97,255,.15); }
+  
+  .err { color: #c62828; font-size: .9rem; }
+  .msg { text-align: center; font-size: .95rem; }
+  .msg.ok { color: #2e7d32; }
+  .msg.ko { color: #c62828; }
+  
+  .actions { display: grid; place-items: center; margin-top: 4px; }
+  .cta {
+    background: #7b61ff;
+    color: #fff;
+    border: 1px solid #7b61ff;
+    border-radius: 10px;
+    padding: 10px 26px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .cta:disabled { opacity: .6; cursor: not-allowed; }
+  
+  /* Séparateur fin sur toute la largeur de la page */
+  .sep {
+    border: none;
+    height: 1px;
+    background: #d9d9df;
+    margin: 22px 0 12px;
+  }
+  
+  /* Abonnements */
+  .muted { color: #777; text-align: center; margin-top: 6px; }
+  
+  .subs {
+    list-style: none;
+    padding: 0;
+    margin: 10px auto 0;
+    width: min(920px, 92vw);
+    display: grid;
+    gap: 14px;
+  }
+  @media (min-width: 900px) {
+    .subs { grid-template-columns: 1fr 1fr; }
+  }
+  .subcard {
+    background: #f3f3fb;
+    border: 1px solid #e8e8f3;
+    border-radius: 12px;
+    padding: 16px;
+  }
+  .subcard__title {
+    margin: 0 0 6px 0;
+    font-weight: 800;
+  }
+  .subcard__desc {
+    color: #4b4b4b;
+    margin: 0 0 12px 0;
+    max-width: 52ch;
+  }
+  
+  .btn-outline {
+    border: 1px solid #7b61ff;
+    color: #7b61ff;
+    background: #fff;
+    border-radius: 10px;
+    padding: 8px 16px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .btn-outline:disabled { opacity: .6; cursor: not-allowed; }
+  

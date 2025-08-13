@@ -1,0 +1,46 @@
+<section class="newpost">
+    <!-- Barre locale avec flèche retour -->
+    <div class="newpost__top">
+      <button class="back" type="button" (click)="goBack()" aria-label="Retour">←</button>
+    </div>
+  
+    <h1 class="title">Créer un nouvel article</h1>
+  
+    <form class="form" [formGroup]="form" (ngSubmit)="submit()">
+      <!-- Sélecteur de thème -->
+      <div class="field">
+        <select class="control" formControlName="topicId">
+          <option [ngValue]="null" disabled selected hidden>Sélectionner un thème</option>
+          <option *ngFor="let t of topics" [ngValue]="t.id">{{ t.name }}</option>
+        </select>
+        <small class="err" *ngIf="form.controls.topicId.touched && form.controls.topicId.invalid">
+          Choisis un thème.
+        </small>
+      </div>
+  
+      <!-- Titre -->
+      <div class="field">
+        <input class="control" type="text" formControlName="title" placeholder="Titre de l’article" />
+        <small class="err" *ngIf="form.controls.title.touched && form.controls.title.invalid">
+          3 à 120 caractères.
+        </small>
+      </div>
+  
+      <!-- Contenu -->
+      <div class="field">
+        <textarea class="control control--textarea" rows="8" formControlName="content" placeholder="Contenu de l’article"></textarea>
+        <small class="err" *ngIf="form.controls.content.touched && form.controls.content.invalid">
+          Contenu requis.
+        </small>
+      </div>
+  
+      <div class="err" *ngIf="errorMsg">{{ errorMsg }}</div>
+  
+      <div class="actions">
+        <button class="cta" type="submit" [disabled]="loading || form.invalid">
+          {{ loading ? 'Création…' : 'Créer' }}
+        </button>
+      </div>
+    </form>
+  </section>
+  

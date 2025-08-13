@@ -1,0 +1,23 @@
+<section class="auth">
+  <button class="auth__back" type="button" (click)="goBack()" aria-label="Retour à l’accueil">←</button>
+
+  <img class="auth__logo" src="/assets/logo_p6.png" alt="MDD" />
+
+  <h1 class="auth__title">Se connecter</h1>
+
+  <form class="auth__form" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+    <label class="field">
+      <span class="field__label">E-mail ou nom d’utilisateur</span>
+      <input class="field__input" type="text" formControlName="email" autocomplete="username" />
+    </label>
+
+    <label class="field">
+      <span class="field__label">Mot de passe</span>
+      <input class="field__input" type="password" formControlName="password" autocomplete="current-password" />
+    </label>
+
+    <button class="btn btn--primary" type="submit" [disabled]="loginForm.invalid || loading">
+      {{ loading ? "Connexion…" : "Se connecter" }}
+    </button>
+  </form>
+</section>

@@ -1,0 +1,67 @@
+/* conteneur central partagé */
+.container { width: min(1100px, 92vw); margin-inline: auto; }
+
+.topbar { position: sticky; top: 0; z-index: 20; background: #fff; border-bottom: 1px solid #eaeaea; }
+.topbar__row {
+  display: grid; grid-template-columns: 1fr auto 1fr; align-items: center;
+  padding: 10px 0; gap: 12px;
+}
+
+.brand img { height: clamp(36px, 7vw, 56px); width: auto; display: block; }
+
+.topnav { display: none; gap: 28px; align-items: center; justify-content: center; }
+.link { background: none; border: 0; padding: 0; cursor: pointer; color: #3b3b3b; text-decoration: none; font-weight: 700; }
+.link--active { text-decoration: underline; }
+.link--danger { color: #d23d3d; }
+
+/* Zone droite (avatar desktop + burger mobile) */
+.topbar__right { display: flex; align-items: center; gap: 10px; justify-self: end; }
+
+/* ✅ avatar en topbar (desktop) */
+.avatar {
+  width: 44px; height: 44px; border-radius: 50%;
+  border: 1px solid #cfcfcf; background: #fff; color: #333;
+  display: grid; place-items: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,.10);
+  text-decoration: none;
+}
+.avatar svg { width: 26px; height: 26px; }
+
+/* Burger */
+.burger { background: none; border: 0; font-size: 22px; cursor: pointer; line-height: 1; }
+
+/* Desktop : afficher nav + avatar, cacher burger */
+@media (min-width: 900px) {
+  .topnav { display: flex; }
+  .avatar--desktop { display: grid; }
+  .burger { display: none; }
+}
+
+/* Mobile : cacher l'avatar de topbar (il est dans le drawer), montrer burger */
+@media (max-width: 899px) {
+  .avatar--desktop { display: none; }
+  .burger { display: inline-block; }
+}
+
+/* Drawer mobile (panneau latéral droit) */
+.drawer { position: fixed; inset: 0; z-index: 30; background: rgba(0,0,0,.25); }
+.drawer__panel {
+  position: absolute; top: 0; right: 0; height: 100%; width: min(300px, 85vw);
+  background: #fff; border-left: 1px solid #eee; box-shadow: -10px 0 24px rgba(0,0,0,.08);
+  display: grid; grid-template-rows: 1fr auto; animation: slideIn .2s ease-out;
+}
+@keyframes slideIn { from { transform: translateX(12px); opacity: .8; } to { transform: translateX(0); opacity: 1; } }
+
+.drawer__content { padding: 16px; display: grid; gap: 8px; align-content: start; }
+.drawer__link { text-align: left; background: none; border: 0; padding: 12px 8px; cursor: pointer; color: #222; text-decoration: none; font-size: 18px; font-weight: 600; }
+.drawer__link--danger { color: #d23d3d; }
+
+/* ✅ avatar en bas du drawer (mobile) */
+.drawer__profile {
+  align-self: end; justify-self: center;
+  width: 60px; height: 60px; border-radius: 50%;
+  border: 1px solid #cfcfcf; background: #ffffff; color: #333;
+  display: grid; place-items: center; margin: 16px auto 22px;
+  box-shadow: 0 2px 8px rgba(0,0,0,.12);
+}
+.drawer__profile svg { width: 30px; height: 30px; }

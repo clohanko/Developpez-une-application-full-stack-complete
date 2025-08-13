@@ -1,5 +1,55 @@
-<div class="center">
-  <img src="/assets/logo_p6.png" alt="logo" />
-  <h1>Welcome to MDD</h1>
-  <button mat-raised-button color="primary" (click)="start()">Commencer</button>
-</div>
+<section class="home">
+  <!-- ===== Landing (non connecté) ===== -->
+  <ng-container *ngIf="!isLogged; else feedTpl">
+    <section class="landing">
+      <div class="landing__box">
+        <img class="landing__logo" src="/assets/logo_p6.png" alt="MDD" />
+        <div class="landing__actions">
+          <a mat-stroked-button color="primary" routerLink="/login" class="btn">Se connecter</a>
+          <a mat-stroked-button routerLink="/register" class="btn">S’inscrire</a>
+        </div>
+      </div>
+    </section>
+  </ng-container>
+
+  <!-- ===== Feed (connecté) ===== -->
+  <ng-template #feedTpl>
+    <!-- Toolbar sous la navbar -->
+    <div class="container toolbar">
+      <a routerLink="/posts/new" class="cta">Créer un article</a>
+
+      <div class="toolbar__sort">
+        <span class="sortlabel">Trier par</span>
+        <button class="sortbtn" (click)="switchSort()" [attr.aria-label]="sort === 'desc' ? 'Plus récent' : 'Plus ancien'">
+          {{ sort === 'desc' ? '↓' : '↑' }}
+        </button>
+      </div>
+    </div>
+
+    <div class="container">
+      <div *ngIf="loading" class="muted">Chargement…</div>
+      <div *ngIf="errorMsg" class="error">{{ errorMsg }}</div>
+
+      <ul *ngIf="!loading && items?.length" class="grid">
+        <li *ngFor="let p of items" class="card">
+          <a [routerLink]="['/posts', p.id]" class="card__title">{{ p.title }}</a>
+          <div class="card__meta">
+            Date · {{ p.createdAt | date:'short' }} &nbsp;•&nbsp; Auteur · {{ p.authorUsername }}
+          </div>
+          <p class="card__excerpt">
+            {{ p.content | slice:0:220 }}<span *ngIf="p.content.length > 220">…</span>
+          </p>
+          <a [routerLink]="['/posts', p.id]" class="card__link">Lire la suite</a>
+        </li>
+      </ul>
+
+      <div *ngIf="!loading && !items?.length" class="muted">Aucun article dans ton fil.</div>
+
+      <div class="pager" *ngIf="total > size">
+        <button mat-stroked-button (click)="prev()" [disabled]="!hasPrev">Précédent</button>
+        <span>{{ page + 1 }} / {{ maxPages }}</span>
+        <button mat-stroked-button (click)="next()" [disabled]="!hasNext">Suivant</button>
+      </div>
+    </div>
+  </ng-template>
+

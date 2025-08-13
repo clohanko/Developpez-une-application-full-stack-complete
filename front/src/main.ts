@@ -1,12 +1,18 @@
-import { enableProdMode } from '@angular/core';
-import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
+// src/main.ts
+import { bootstrapApplication } from '@angular/platform-browser';
+import { provideRouter } from '@angular/router';
+import { AppComponent } from './app/app.component';
+import { APP_ROUTES } from './app/app.routes';
 
-import { AppModule } from './app/app.module';
-import { environment } from './environments/environment';
+// Si tu utilises HttpClient en standalone :
+import { provideHttpClient } from '@angular/common/http';
+// Si tu as des interceptors, tu peux faire :
+// import { provideHttpClient, withInterceptors } from '@angular/common/http';
+// ... puis provideHttpClient(withInterceptors([tonInterceptor]))
 
-if (environment.production) {
-  enableProdMode();
-}
-
-platformBrowserDynamic().bootstrapModule(AppModule)
-  .catch(err => console.error(err));
+bootstrapApplication(AppComponent, {
+  providers: [
+    provideRouter(APP_ROUTES),
+    provideHttpClient(),
+  ],
+}).catch(err => console.error(err));

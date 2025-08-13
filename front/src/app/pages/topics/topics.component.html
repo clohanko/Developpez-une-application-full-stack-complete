@@ -1,0 +1,40 @@
+<section class="topics">
+    <div class="container">
+      <h1 class="title">Thèmes</h1>
+  
+      <p class="muted" *ngIf="!topics?.length">Aucun thème pour le moment.</p>
+  
+      <ul *ngIf="topics?.length" class="grid">
+        <li *ngFor="let t of topics; trackBy: trackById" class="card">
+          <div class="card__header">
+            <h3 class="card__title">{{ t.name }}</h3>
+            <div class="card__slug">/{{ t.slug }}</div>
+          </div>
+  
+          <p class="card__desc" *ngIf="t.description">{{ t.description }}</p>
+  
+          <div class="card__actions" *ngIf="isLogged; else askLogin">
+            <!-- Abonnement -->
+            <button
+              *ngIf="!isSubscribed(t.id); else already"
+              class="btn btn--primary"
+              (click)="onSubscribe(t.id)"
+              [disabled]="loadingIds.has(t.id)"
+            >
+              {{ loadingIds.has(t.id) ? 'Abonnement…' : 'S’abonner' }}
+            </button>
+  
+            <!-- Déjà abonné (désactivé) -->
+            <ng-template #already>
+              <button class="btn btn--muted" type="button" disabled>Déjà abonné</button>
+            </ng-template>
+          </div>
+  
+          <ng-template #askLogin>
+            <div class="card__hint">Connecte-toi pour t’abonner</div>
+          </ng-template>
+        </li>
+      </ul>
+    </div>
+  </section>
+  

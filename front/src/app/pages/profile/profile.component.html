@@ -1,0 +1,48 @@
+<section class="profile">
+  <h1 class="title">Profil utilisateur</h1>
+
+  <!-- ===== Formulaire profil ===== -->
+  <form class="form" [formGroup]="profileForm" (ngSubmit)="submitProfile()">
+    <input class="control" type="text" formControlName="username" placeholder="Username" />
+    <small class="err" *ngIf="f.username.touched && f.username.invalid">
+      Nom requis (min 2 caractères).
+    </small>
+
+    <input class="control" type="email" formControlName="email" placeholder="email@email.fr" />
+    <small class="err" *ngIf="f.email.touched && f.email.invalid">
+      Email invalide.
+    </small>
+
+    <input class="control" type="password" placeholder="Mot de passe" disabled />
+
+    <div class="msg" *ngIf="msgProfile" [class.ok]="msgProfile.type==='success'" [class.ko]="msgProfile.type==='error'">
+      {{ msgProfile.text }}
+    </div>
+
+    <div class="actions">
+      <button class="cta" type="submit" [disabled]="loadingProfile || profileForm.invalid">
+        {{ loadingProfile ? 'Enregistrement…' : 'Sauvegarder' }}
+      </button>
+    </div>
+  </form>
+
+  <hr class="sep" />
+
+  <!-- ===== Abonnements ===== -->
+  <h2 class="subtitle">Abonnements</h2>
+
+  <div *ngIf="!subscriptions.length" class="muted">
+    Aucun abonnement pour le moment.
+  </div>
+
+  <ul *ngIf="subscriptions.length" class="subs">
+    <li *ngFor="let t of subscriptions" class="subcard">
+      <h3 class="subcard__title">{{ t.name }}</h3>
+      <p class="subcard__desc">{{ t.description }}</p>
+
+      <button class="btn-outline" type="button" (click)="onUnsubscribe(t.id)" [disabled]="loadingIds.has(t.id)">
+        {{ loadingIds.has(t.id) ? '…' : 'Se désabonner' }}
+      </button>
+    </li>
+  </ul>
+</section>

@@ -1,0 +1,105 @@
+.post { width: min(960px, 92vw); margin: 18px auto 28px; }
+
+/* top: flèche + titre */
+.post__top { display: grid; grid-template-columns: auto 1fr; gap: 8px 12px; align-items: center; }
+.back { background: none; border: 0; font-size: 22px; line-height: 1; cursor: pointer; }
+.title { font-size: clamp(20px, 2.6vw, 28px); font-weight: 800; margin: 0; }
+
+/* en-têtes meta (3 colonnes) */
+.meta {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px 12px;
+  margin: 10px 0 6px;
+}
+.meta__cell .label { color: #555; font-weight: 600; }
+@media (max-width: 700px) { .meta { grid-template-columns: 1fr; } }
+
+/* contenu + séparateur */
+.content { color: #222; white-space: pre-wrap; line-height: 1.55; margin-top: 10px; }
+.sep { border: none; height: 1px; background: #d9d9df; margin: 14px 0; }
+
+/* commentaires */
+.comments { margin-top: 8px; }
+.comments h2 { font-size: clamp(18px, 2.4vw, 22px); margin: 8px 0 12px; }
+
+/* Liste : username gauche, bulle droite (desktop) */
+.clist { list-style: none; padding: 0; margin: 0; display: grid; gap: 14px; }
+
+.citem {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: start;
+  column-gap: 18px;
+}
+
+/* username */
+.citem__user {
+  font-weight: 700;
+  color: #333;
+  padding-top: 8px; /* alignement vertical avec la bulle */
+  white-space: nowrap;
+}
+
+/* bulle à droite */
+.citem__bubble {
+  background: #e9e9f3;
+  border: 1px solid #deddf0;
+  border-radius: 12px;
+  padding: 12px 14px;
+  color: #222;
+  white-space: pre-wrap;
+}
+
+/* Mobile : username au-dessus à droite, bulle dessous (comme la maquette) */
+@media (max-width: 700px) {
+  .citem {
+    grid-template-columns: 1fr;
+    row-gap: 6px;
+  }
+  .citem__user {
+    text-align: right;
+    padding-top: 0;
+  }
+}
+
+/* Formulaire d'ajout */
+.cform__form { margin-top: 8px; }
+.cform__box {
+  position: relative;
+  display: grid;
+  align-items: center;
+  /* pour créer un contexte de positionnement au bouton */
+}
+.cform__textarea {
+  width: 90%;
+  padding: 14px 16px;
+  border: 1px solid #dadce0;
+  border-radius: 12px;
+  resize: vertical;
+  min-height: 56px;
+  font-size: 1rem;
+  outline: none;
+}
+.cform__textarea:focus { border-color: #7b61ff; box-shadow: 0 0 0 3px rgba(123,97,255,.15); }
+
+/* flèche à droite, à l’extérieur du champ */
+.cform__send {
+  position: absolute;
+  right: -18px;               /* la fait dépasser à droite */
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px; height: 40px;
+  display: grid; place-items: center;
+  border-radius: 999px;
+  border: 1px solid #e0e0e0;
+  background: #f5f6ff;
+  color: #6f58ff;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0,0,0,.08);
+}
+.cform__send:disabled { opacity: .6; cursor: not-allowed; }
+
+/* helpers */
+.muted { color: #777; }
+.error { color: crimson; }

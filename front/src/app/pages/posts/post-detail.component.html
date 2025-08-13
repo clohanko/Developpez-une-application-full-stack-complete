@@ -1,0 +1,73 @@
+<section class="post">
+    <div *ngIf="loading" class="muted">Chargement…</div>
+    <div *ngIf="!loading && errorMsg" class="error">{{ errorMsg }}</div>
+  
+    <ng-container *ngIf="!loading && post">
+      <!-- barre locale: flèche retour + titre -->
+      <div class="post__top">
+        <button class="back" type="button" (click)="goBack()" aria-label="Retour">←</button>
+        <h1 class="title">{{ post.title }}</h1>
+      </div>
+  
+      <!-- entêtes meta (Date • Auteur • Thème) -->
+      <div class="meta">
+        <div class="meta__cell">{{ post.createdAt | date:'short' }}</div>
+        <div class="meta__cell">{{ post.authorUsername }}</div>
+        <div class="meta__cell">{{ post.topicName }}</div>
+      </div>
+      
+      <hr class="sep" />
+  
+      <!-- contenu -->
+      <article class="content">
+        {{ post.content }}
+      </article>
+  
+      <hr class="sep" />
+  
+      <!-- commentaires -->
+      <section class="comments">
+        <h2>Commentaires</h2>
+  
+        <div *ngIf="!post.comments?.length" class="muted">Aucun commentaire pour le moment.</div>
+  
+        <ul *ngIf="post.comments?.length" class="clist">
+          <li *ngFor="let c of post.comments" class="citem">
+            <!-- username à gauche, bulle à droite (desktop) -->
+            <div class="citem__user">{{ c.authorUsername }}</div>
+            <div class="citem__bubble">{{ c.content }}</div>
+          </li>
+        </ul>
+  
+        <!-- ajout d'un commentaire -->
+        <div class="cform">
+          <div *ngIf="!isLogged" class="muted">Connecte-toi pour commenter.</div>
+  
+          <form *ngIf="isLogged" [formGroup]="commentForm" (ngSubmit)="addComment()" class="cform__form">
+            <div class="cform__box">
+              <textarea
+                class="cform__textarea"
+                rows="3"
+                formControlName="content"
+                placeholder="Écrivez ici votre commentaire"
+              ></textarea>
+  
+              <!-- flèche à droite, à l'extérieur du champ -->
+              <button
+                class="cform__send"
+                type="submit"
+                [disabled]="sending || commentForm.invalid"
+                aria-label="Publier le commentaire"
+                title="Publier le commentaire"
+              >
+                <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+                  <path d="M3 11l18-8-8 18-2-7-8-3z" fill="currentColor"></path>
+                </svg>
+              </button>
+            </div>
+          </form>
+        </div>
+      </section>
+    </ng-container>
+  </section>
+  
