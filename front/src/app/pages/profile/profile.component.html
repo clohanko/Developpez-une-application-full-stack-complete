@@ -13,8 +13,6 @@
       Email invalide.
     </small>
 
-    <input class="control" type="password" placeholder="Mot de passe" disabled />
-
     <div class="msg" *ngIf="msgProfile" [class.ok]="msgProfile.type==='success'" [class.ko]="msgProfile.type==='error'">
       {{ msgProfile.text }}
     </div>
@@ -24,6 +22,35 @@
         {{ loadingProfile ? 'Enregistrement…' : 'Sauvegarder' }}
       </button>
     </div>
+  </form>
+
+  <hr class="sep" />
+
+  <!-- ===== Changer de mot de passe (formulaire séparé) ===== -->
+  <form class="form" [formGroup]="passwordForm" (ngSubmit)="submitPassword()" style="margin-top: 24px;">
+    <h2 class="subtitle">Changer de mot de passe</h2>
+
+    <input class="control" type="password" formControlName="oldPassword" placeholder="Ancien mot de passe" />
+    <small class="err" *ngIf="p.oldPassword.touched && p.oldPassword.invalid">
+      Ancien mot de passe requis (min 6 caractères).
+    </small>
+
+    <input class="control" type="password" formControlName="newPassword" placeholder="Nouveau mot de passe" />
+    <small class="err" *ngIf="p.newPassword.touched && p.newPassword.invalid">
+      Nouveau mot de passe requis (min 6 caractères).
+    </small>
+
+    <input class="control" type="password" formControlName="confirmNewPassword" placeholder="Confirmer le nouveau mot de passe" />
+    <small class="err" *ngIf="passwordForm.hasError('passwordMismatch') && p.confirmNewPassword.touched">
+      Les mots de passe ne correspondent pas.
+    </small>
+
+    <button class="btn" type="submit" [disabled]="passwordForm.invalid || loadingPassword">
+      {{ loadingPassword ? '…' : 'Mettre à jour le mot de passe' }}
+    </button>
+
+    <p class="msg success" *ngIf="msgPassword?.type === 'success'">{{ msgPassword?.text }}</p>
+    <p class="msg error"   *ngIf="msgPassword?.type === 'error'">{{ msgPassword?.text }}</p>
   </form>
 
   <hr class="sep" />

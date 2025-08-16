@@ -1,9 +1,18 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import {
+  ReactiveFormsModule, FormBuilder, Validators,
+  FormGroup, FormControl
+} from '@angular/forms';
 import { Router } from '@angular/router';
 import { TopicService, Topic } from 'src/app/services/topic.service';
-import { PostService } from 'src/app/services/post.service';
+import { PostService, CreatePostPayload } from 'src/app/services/post.service';
+
+type NewPostForm = FormGroup<{
+  topicId: FormControl<number | null>;
+  title:   FormControl<string>;
+  content: FormControl<string>;
+}>;
 
 @Component({
   selector: 'app-new-post',
@@ -17,10 +26,11 @@ export class NewPostComponent implements OnInit {
   loading = false;
   errorMsg = '';
 
-  form = this.fb.group({
-    topicId: [null as number | null, Validators.required],
-    title: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(120)]],
-    content: ['', [Validators.required, Validators.minLength(1), Validators.maxLength(10000)]],
+  // ✅ Formulaire strictement typé
+  form: NewPostForm = this.fb.group({
+    topicId: this.fb.control<number | null>(null, { validators: [Validators.required] }),
+    title:   this.fb.nonNullable.control('', [Validators.required, Validators.minLength(3), Validators.maxLength(120)]),
+    content: this.fb.nonNullable.control('', [Validators.required, Validators.minLength(1), Validators.maxLength(10000)]),
   });
 
   constructor(
@@ -49,7 +59,18 @@ export class NewPostComponent implements OnInit {
       return;
     }
     this.loading = true;
-    this.postService.create(this.form.value as any).subscribe({
+
+    const { topicId, title, content } = this.form.getRawValue();
+
+    if (topicId == null) {
+      this.errorMsg = 'Choisis un thème.';
+      this.loading = false;
+      return;
+    }
+
+    const payload: CreatePostPayload = { topicId, title, content };
+
+    this.postService.create(payload).subscribe({
       next: (post) => this.router.navigate(['/posts', post.id]),
       error: () => {
         this.errorMsg = 'Échec de création.';
