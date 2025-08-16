@@ -4,6 +4,14 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from 'src/environments/environment';
 import { Observable } from 'rxjs';
 
+/** Représente la réponse /user/me */
+export interface MeDto {
+  id: number;
+  username: string;
+  email: string;
+  // ajoute ici d'autres champs si ton API /me en renvoie (ex: roles?: string[])
+}
+
 export interface UpdateUserPayload {
   email: string;
   username: string;
@@ -14,17 +22,15 @@ export interface UpdatePasswordPayload {
   newPassword: string;
 }
 
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable({ providedIn: 'root' })
 export class UserService {
   private apiUrl = `${environment.apiUrl}/user`;
 
   constructor(private http: HttpClient) {}
 
   /** Récupère l'utilisateur courant */
-  getCurrentUser(): Observable<any> {
-    return this.http.get(`${this.apiUrl}/me`, { withCredentials: true });
+  getCurrentUser(): Observable<MeDto> {
+    return this.http.get<MeDto>(`${this.apiUrl}/me`, { withCredentials: true });
   }
 
   /** Met à jour email/username (correspond à PUT /api/user/me) */

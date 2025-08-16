@@ -1,12 +1,14 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import {
-  ReactiveFormsModule, FormBuilder, Validators, AbstractControl, ValidationErrors
+  ReactiveFormsModule, FormBuilder, Validators, AbstractControl, ValidationErrors,
+  FormGroup, FormControl
 } from '@angular/forms';
 import { Router } from '@angular/router';
-import { take } from 'rxjs/operators';
+import { take, catchError } from 'rxjs/operators';
+import { of } from 'rxjs';
 
-import { UserService, UpdateUserPayload, UpdatePasswordPayload } from 'src/app/services/user.service';
+import { UserService, UpdateUserPayload, UpdatePasswordPayload, MeDto } from 'src/app/services/user.service';
 import { AuthService } from 'src/app/services/auth.service';
 import { TopicService, Topic } from 'src/app/services/topic.service';
 
@@ -16,6 +18,17 @@ function matchPasswords(group: AbstractControl): ValidationErrors | null {
   return pwd && conf && pwd !== conf ? { passwordMismatch: true } : null;
 }
 
+type ProfileForm = FormGroup<{
+  email:    FormControl<string>;
+  username: FormControl<string>;
+}>;
+
+type PasswordForm = FormGroup<{
+  oldPassword:        FormControl<string>;
+  newPassword:        FormControl<string>;
+  confirmNewPassword: FormControl<string>;
+}>;
+
 @Component({
   selector: 'app-profile',
   standalone: true,
@@ -24,7 +37,7 @@ function matchPasswords(group: AbstractControl): ValidationErrors | null {
   styleUrls: ['./profile.component.scss'],
 })
 export class ProfileComponent implements OnInit {
-  user: any;
+  user: MeDto | null = null;
 
   /** Tous les topics (pour mapper les IDs -> objets) */
   private allTopics: Topic[] = [];
@@ -36,15 +49,15 @@ export class ProfileComponent implements OnInit {
   loadingIds = new Set<number>();
 
   // ------ Forms ------
-  profileForm = this.fb.group({
-    email: ['', [Validators.required, Validators.email]],
-    username: ['', [Validators.required, Validators.minLength(2)]],
+  profileForm: ProfileForm = this.fb.group({
+    email:    this.fb.nonNullable.control('', [Validators.required, Validators.email]),
+    username: this.fb.nonNullable.control('', [Validators.required, Validators.minLength(2)]),
   });
 
-  passwordForm = this.fb.group({
-    oldPassword: ['', [Validators.required, Validators.minLength(6)]],
-    newPassword: ['', [Validators.required, Validators.minLength(6)]],
-    confirmNewPassword: ['', [Validators.required]],
+  passwordForm: PasswordForm = this.fb.group({
+    oldPassword:        this.fb.nonNullable.control('', [Validators.required, Validators.minLength(6)]),
+    newPassword:        this.fb.nonNullable.control('', [Validators.required, Validators.minLength(6)]),
+    confirmNewPassword: this.fb.nonNullable.control('', [Validators.required]),
   }, { validators: matchPasswords });
 
   // UI
@@ -62,8 +75,11 @@ export class ProfileComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    // 1) Ping session
-    this.auth.checkSession().pipe(take(1)).subscribe(ok => {
+    // 1) Ping session (avec gestion d’erreur)
+    this.auth.checkSession().pipe(
+      take(1),
+      catchError(() => of(false))
+    ).subscribe(ok => {
       if (!ok) {
         this.router.navigateByUrl('/login');
         return;
@@ -74,14 +90,14 @@ export class ProfileComponent implements OnInit {
         next: (data) => {
           this.user = data;
           this.profileForm.patchValue({
-            email: data?.email ?? '',
-            username: data?.username ?? '',
+            email: data.email,
+            username: data.username,
           });
         },
         error: () => this.router.navigateByUrl('/login'),
       });
 
-      // 3) Charger tous les topics puis mes abonnements (même logique que TopicsComponent)
+      // 3) Charger tous les topics puis mes abonnements
       this.topics.list().pipe(take(1)).subscribe({
         next: (all) => {
           this.allTopics = all;
@@ -117,13 +133,14 @@ export class ProfileComponent implements OnInit {
       this.profileForm.markAllAsTouched();
       return;
     }
-    const payload: UpdateUserPayload = this.profileForm.value as UpdateUserPayload;
+    // plus de cast : on est typé
+    const payload: UpdateUserPayload = this.profileForm.getRawValue();
     this.loadingProfile = true;
     this.userService.updateMe(payload).pipe(take(1)).subscribe({
       next: () => {
         this.msgProfile = { type: 'success', text: 'Profil mis à jour.' };
         this.loadingProfile = false;
-        this.user = { ...this.user, ...payload };
+        this.user = this.user ? { ...this.user, ...payload } : { id: 0, ...payload }; // id conservé si présent
       },
       error: () => {
         this.msgProfile = { type: 'error', text: 'Échec de la mise à jour.' };
@@ -139,16 +156,15 @@ export class ProfileComponent implements OnInit {
       this.passwordForm.markAllAsTouched();
       return;
     }
-    const payload: UpdatePasswordPayload = {
-      oldPassword: this.passwordForm.value.oldPassword!,
-      newPassword: this.passwordForm.value.newPassword!,
-    };
+    const { oldPassword, newPassword } = this.passwordForm.getRawValue();
+    const payload: UpdatePasswordPayload = { oldPassword, newPassword };
+
     this.loadingPassword = true;
     this.userService.updatePassword(payload).pipe(take(1)).subscribe({
       next: () => {
         this.msgPassword = { type: 'success', text: 'Mot de passe mis à jour.' };
         this.loadingPassword = false;
-        this.passwordForm.reset();
+        this.passwordForm.reset({ oldPassword: '', newPassword: '', confirmNewPassword: '' });
       },
       error: () => {
         this.msgPassword = { type: 'error', text: 'Échec du changement de mot de passe.' };
@@ -164,7 +180,6 @@ export class ProfileComponent implements OnInit {
 
     this.topics.unsubscribe(topicId).pipe(take(1)).subscribe({
       next: () => {
-        // Retire localement + garde l’UI réactive
         this.subscriptions = this.subscriptions.filter(t => Number(t.id) !== Number(topicId));
         this.loadingIds.delete(topicId);
       },
