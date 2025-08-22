@@ -6,10 +6,8 @@ import { Observable } from 'rxjs';
 
 /** Représente la réponse /user/me */
 export interface MeDto {
-  id: number;
   username: string;
   email: string;
-  // ajoute ici d'autres champs si ton API /me en renvoie (ex: roles?: string[])
 }
 
 export interface UpdateUserPayload {
@@ -33,7 +31,7 @@ export class UserService {
     return this.http.get<MeDto>(`${this.apiUrl}/me`, { withCredentials: true });
   }
 
-  /** Met à jour email/username (correspond à PUT /api/user/me) */
+  /** Met à jour email/username (PUT /api/user/me) */
   updateMe(payload: UpdateUserPayload): Observable<string> {
     return this.http.put(`${this.apiUrl}/me`, payload, {
       withCredentials: true,

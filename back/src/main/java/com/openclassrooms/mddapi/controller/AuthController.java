@@ -29,22 +29,23 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> loginUser(@Valid @RequestBody LoginRequest request) {
-        String jwt = authService.login(request);
+        String jwt = authService.login(request); // le "sub" du JWT = username (recommandé)
 
         ResponseCookie jwtCookie = ResponseCookie.from("token", jwt)
                 .httpOnly(true)
-                .secure(false) // mettre true si HTTPS
-                .path("/")
-                .maxAge(24 * 60 * 60)
+                .secure(false)      // true en prod (HTTPS)
                 .sameSite("Lax")
+                .path("/")
+                .maxAge(24*60*60)
                 .build();
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, jwtCookie.toString())
-                .body("Connexion réussie");
+                .body(java.util.Map.of("token", jwt, "message", "Connexion réussie"));
     }
 
-        @PostMapping("/logout")
+
+    @PostMapping("/logout")
         public ResponseEntity<?> logoutUser(HttpServletResponse response) {
             ResponseCookie cookie = ResponseCookie.from("token", "")
                     .httpOnly(true)

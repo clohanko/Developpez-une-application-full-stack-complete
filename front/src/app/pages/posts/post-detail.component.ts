@@ -4,6 +4,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { PostService, PostDto } from 'src/app/services/post.service';
 import { AuthService } from 'src/app/services/auth.service';
+import { catchError } from 'rxjs/operators';
+import { of } from 'rxjs';
 
 @Component({
   selector: 'app-post-detail',
@@ -19,7 +21,7 @@ export class PostDetailComponent implements OnInit {
   isLogged = false;
 
   commentForm = this.fb.group({
-    content: ['', [Validators.required, Validators.minLength(1)]],
+    content: ['', [Validators.required, Validators.minLength(1), Validators.maxLength(5000)]],
   });
   sending = false;
 
@@ -32,7 +34,10 @@ export class PostDetailComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.auth.getLoginStatus().subscribe(ok => (this.isLogged = ok));
+    this.auth.getLoginStatus()
+      .pipe(catchError(() => of(false)))
+      .subscribe(ok => (this.isLogged = ok));
+
     const id = Number(this.route.snapshot.paramMap.get('id'));
     this.postService.getOne(id).subscribe({
       next: (p) => { this.post = p; this.loading = false; },
@@ -40,12 +45,19 @@ export class PostDetailComponent implements OnInit {
     });
   }
 
+  /** Appelé par (click)="goBack()" dans le template */
   goBack(): void {
     if (history.length > 1) history.back();
     else this.router.navigate(['/']);
   }
 
+  /** Appelé par (ngSubmit)="addComment()" dans le template */
   addComment(): void {
+    this.submitComment();
+  }
+
+  /** Implémentation réelle d’envoi du commentaire */
+  private submitComment(): void {
     if (!this.isLogged || this.commentForm.invalid || !this.post || this.sending) {
       this.commentForm.markAllAsTouched(); return;
     }

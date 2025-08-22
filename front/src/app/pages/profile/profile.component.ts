@@ -54,7 +54,7 @@ export class ProfileComponent implements OnInit {
     username: this.fb.nonNullable.control('', [Validators.required, Validators.minLength(2)]),
   });
 
-  passwordForm: PasswordForm = this.fb.group({
+  passwordForm: PasswordForm = this.fb.nonNullable.group({
     oldPassword:        this.fb.nonNullable.control('', [Validators.required, Validators.minLength(6)]),
     newPassword:        this.fb.nonNullable.control('', [Validators.required, Validators.minLength(6)]),
     confirmNewPassword: this.fb.nonNullable.control('', [Validators.required]),
@@ -133,14 +133,15 @@ export class ProfileComponent implements OnInit {
       this.profileForm.markAllAsTouched();
       return;
     }
-    // plus de cast : on est typé
     const payload: UpdateUserPayload = this.profileForm.getRawValue();
     this.loadingProfile = true;
     this.userService.updateMe(payload).pipe(take(1)).subscribe({
       next: () => {
         this.msgProfile = { type: 'success', text: 'Profil mis à jour.' };
         this.loadingProfile = false;
-        this.user = this.user ? { ...this.user, ...payload } : { id: 0, ...payload }; // id conservé si présent
+        this.user = this.user
+          ? { ...this.user, ...payload }
+          : { username: payload.username, email: payload.email };
       },
       error: () => {
         this.msgProfile = { type: 'error', text: 'Échec de la mise à jour.' };

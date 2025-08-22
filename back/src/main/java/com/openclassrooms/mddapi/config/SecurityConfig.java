@@ -1,5 +1,8 @@
 package com.openclassrooms.mddapi.config;
 
+
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import com.openclassrooms.mddapi.security.JwtCookieAuthFilter;
 import com.openclassrooms.mddapi.security.JwtUtils;
 import com.openclassrooms.mddapi.security.UserDetailsServiceImpl;
@@ -14,6 +17,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -24,6 +28,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import jakarta.servlet.http.HttpServletResponse;
 
 
+@Profile("!test")
 @Configuration
 public class SecurityConfig {
 
@@ -66,14 +71,15 @@ public class SecurityConfig {
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 // ▶️ Règles d'accès
                 .authorizeHttpRequests(auth -> auth
-                        // Public
-                        .requestMatchers("/api/auth/**").permitAll()
-                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/posts/**").permitAll()
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                        .requestMatchers("/error").permitAll()
+                        .requestMatchers(new AntPathRequestMatcher("/api/auth/**")).permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/topics/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/posts/**").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/topics", "/api/topics/**").permitAll()
-                        // Tout le reste nécessite auth
                         .anyRequest().authenticated()
                 )
+
                 // ▶️ 401 clair quand non authentifié (pas de 302/html)
                 .exceptionHandling(e -> e.authenticationEntryPoint((req, res, ex) ->
                         res.sendError(HttpServletResponse.SC_UNAUTHORIZED)))

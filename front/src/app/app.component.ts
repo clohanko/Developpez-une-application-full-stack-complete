@@ -1,7 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, NavigationEnd, RouterOutlet } from '@angular/router';
-import { filter } from 'rxjs/operators';
+import { filter, catchError } from 'rxjs/operators';
+import { of } from 'rxjs';
 
 import { AuthService } from './services/auth.service';
 import { NavbarComponent } from './components/navbar/navbar.component';
@@ -15,18 +16,22 @@ import { NavbarComponent } from './components/navbar/navbar.component';
 export class AppComponent implements OnInit {
   isLogged = false;
   isHomePage = false;
-  isAuthPage = false; // ⬅️ NEW
+  isAuthPage = false;
 
   constructor(private authService: AuthService, private router: Router) {}
 
   ngOnInit(): void {
-    // Ping session (il faut souscrire)
-    this.authService.checkSession().subscribe();
+    // Ping session (protégé contre les erreurs réseau)
+    this.authService.checkSession()
+      .pipe(catchError(() => of(false)))
+      .subscribe();
 
-    // Suivre l'état de connexion
-    this.authService.getLoginStatus().subscribe(status => {
-      this.isLogged = status;
-    });
+    // Suivre l'état de connexion (fallback à false en cas d’erreur)
+    this.authService.getLoginStatus()
+      .pipe(catchError(() => of(false)))
+      .subscribe(status => {
+        this.isLogged = status;
+      });
 
     const computeFlags = (url: string | undefined) => {
       const u = url ?? '';

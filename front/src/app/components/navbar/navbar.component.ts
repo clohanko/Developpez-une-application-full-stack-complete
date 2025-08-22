@@ -3,6 +3,8 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { AuthService } from 'src/app/services/auth.service';
+import { catchError } from 'rxjs/operators';
+import { of } from 'rxjs';
 
 @Component({
   selector: 'app-navbar',
@@ -16,7 +18,9 @@ export class NavbarComponent {
   menuOpen = false;
 
   constructor(private auth: AuthService, private router: Router) {
-    this.auth.getLoginStatus().subscribe(ok => (this.isLogged = ok));
+    this.auth.getLoginStatus()
+      .pipe(catchError(() => of(false)))
+      .subscribe(ok => (this.isLogged = ok));
   }
 
   toggleMenu(): void { this.menuOpen = !this.menuOpen; }

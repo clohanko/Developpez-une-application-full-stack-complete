@@ -15,9 +15,7 @@ export interface RegisterPayload {
   username: string;
 }
 
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable({ providedIn: 'root' })
 export class AuthService {
   private apiUrl = `${environment.apiUrl}/auth`;
 
@@ -26,7 +24,9 @@ export class AuthService {
 
   constructor(private http: HttpClient) {
     // Synchronise l'état dès le démarrage de l'app (utile après F5).
-    this.checkSession().subscribe();
+    this.checkSession()
+      .pipe(catchError(() => of(false)))
+      .subscribe(); // pas d'erreur propagée
   }
 
   /** ---- AUTH FLOWS ---- */
@@ -40,7 +40,6 @@ export class AuthService {
     );
   }
 
-  // Supprimer les any -> typé via RegisterPayload + Observable<string>
   register(data: RegisterPayload): Observable<string> {
     return this.http.post(`${this.apiUrl}/register`, data, {
       withCredentials: true,
@@ -51,12 +50,19 @@ export class AuthService {
   }
 
   logout(): void {
-    this.logoutFromServer().subscribe(() => {
-      this.loggedIn.next(false);
-      // Optionnel : purge d'un éventuel cookie non HttpOnly en dev
-      // (le cookie HttpOnly est invalidé côté serveur).
-      document.cookie = 'jwt=; Max-Age=0; path=/';
-      document.cookie = 'token=; Max-Age=0; path=/';
+    this.logoutFromServer().subscribe({
+      next: () => {
+        this.loggedIn.next(false);
+        // Purge éventuelle (dev) — le cookie HttpOnly est invalidé côté serveur
+        document.cookie = 'jwt=; Max-Age=0; path=/';
+        document.cookie = 'token=; Max-Age=0; path=/';
+      },
+      error: () => {
+        // Même si le serveur échoue, on force le logout côté client
+        this.loggedIn.next(false);
+        document.cookie = 'jwt=; Max-Age=0; path=/';
+        document.cookie = 'token=; Max-Age=0; path=/';
+      }
     });
   }
 
@@ -72,14 +78,16 @@ export class AuthService {
 
   // Au lieu de lire document.cookie, on demande au serveur.
   updateLoginStatus(): void {
-    this.checkSession().subscribe();
+    this.checkSession()
+      .pipe(catchError(() => of(false)))
+      .subscribe();
   }
 
   /**
    * Ping /user/me pour savoir si la session est valide.
    * Met à jour loggedIn et renvoie true/false.
    */
-  checkSession() {
+  checkSession(): Observable<boolean> {
     return this.http.get(`${environment.apiUrl}/user/me`, { withCredentials: true }).pipe(
       map(() => true),
       catchError(() => of(false)),

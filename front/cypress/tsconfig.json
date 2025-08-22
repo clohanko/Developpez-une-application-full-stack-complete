@@ -1,0 +1,9 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "types": ["cypress"],
+    "lib": ["es2019", "dom", "dom.iterable"],
+    "strict": true
+  },
+  "include": ["**/*.ts", "**/*.d.ts"]
+}
