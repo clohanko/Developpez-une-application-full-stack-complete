@@ -157,15 +157,6 @@ back/src/main/java/com/openclassrooms/mddapi
 
 ---
 
-## Checklist dev
-- [ ] Base `mdd` créée et accessible  
-- [ ] Back lancé (`mvn spring-boot:run`) sur `:8080`  
-- [ ] Front lancé (`npm start`) sur `:4200`  
-- [ ] `environment.ts` → `http://localhost:8080/api`  
-- [ ] Tests front (`ng test`) & back (`mvn test`) passent  
-
----
-
 ## Équipe
 - Orlando — Responsable  
 - Heidi — Développeuse  
