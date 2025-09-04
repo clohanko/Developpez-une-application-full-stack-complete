@@ -6,6 +6,8 @@ import { of, throwError } from 'rxjs';
 import { LoginComponent } from './login.component';
 import { AuthService } from 'src/app/services/auth.service';
 
+declare const expect: (actual: any) => jasmine.Matchers<any>;
+
 describe('LoginComponent (branches)', () => {
   function setup(loginResult: 'success' | 'error' = 'success') {
     const auth = jasmine.createSpyObj<AuthService>('AuthService', [

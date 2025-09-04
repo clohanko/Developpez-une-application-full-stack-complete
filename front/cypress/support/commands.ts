@@ -2,15 +2,15 @@
 export {}; // force module
 
 // ================= UI commands =================
-Cypress.Commands.add('loginViaUI', (email: string, password: string) => {
-  if (!email || !password) throw new Error('Définis E2E_EMAIL / E2E_PASSWORD');
+Cypress.Commands.add('loginViaUI', (emailOrUsername: string, password: string) => {
+  if (!emailOrUsername || !password) throw new Error('Définis E2E_EMAIL / E2E_PASSWORD');
 
   // Intercept AVANT la visite pour capter la requête
   cy.intercept('POST', '**/api/auth/login').as('login');
 
   return cy
     .visit('/login', { failOnStatusCode: false })
-    .get('input[formControlName="email"]').clear().type(email)
+    .get('input[formControlName="email"]').clear().type(emailOrUsername) // champ 'email' accepte aussi username
     .get('input[formControlName="password"]').clear().type(password)
     .get('button[type="submit"]').click()
     .then(() => undefined); // neutralise le subject si tu chaines derrière
@@ -24,6 +24,8 @@ Cypress.Commands.add('registerViaUI', (email: string, password: string, username
     .get('input[formControlName="username"]').clear().type(username)
     .get('input[formControlName="email"]').clear().type(email)
     .get('input[formControlName="password"]').clear().type(password)
+    // ⬇️ nécessaire depuis l’ajout du champ de confirmation côté front
+    .get('input[formControlName="passwordConfirm"]').clear().type(password)
     .get('button[type="submit"]').click()
     .then(() =>
       cy.wait('@register').then((i) => {
@@ -56,61 +58,47 @@ Cypress.Commands.add('ensureUserViaAPI', (email: string, password: string, usern
     .then(() => undefined);
 });
 
-Cypress.Commands.add('loginProgrammatically', (email: string, password: string) => {
-  const attempts = [
-    { email, password },
-    { emailOrUsername: email, password },
-    { username: email, password },
-    { login: email, password },
-  ] as Array<Record<string, unknown>>;
+Cypress.Commands.add('loginProgrammatically', (identifier: string, password: string) => {
+  // ⚠️ Back attend un DTO { email: <email OU username>, password }
+  const emailField = (identifier || '').trim().toLowerCase();
 
-  const tryLogin = (idx = 0): Cypress.Chainable<Cypress.Response<any>> => {
-    if (idx >= attempts.length) {
-      throw new Error('Login API a échoué avec toutes les variantes de payload.');
-    }
-    return cy
-      .request({
-        method: 'POST',
-        url: `${API}/auth/login`,
-        body: attempts[idx],
-        failOnStatusCode: false,
-      })
-      .then((res) => {
-        if ([200, 201, 204].includes(res.status)) return cy.wrap(res);
+  const doLogin = () =>
+    cy.request({
+      method: 'POST',
+      url: `${API}/auth/login`,
+      body: { email: emailField, password },
+      failOnStatusCode: false,
+    });
 
-        // Dernière chance : XSRF (rare mais on couvre)
-        if (idx === attempts.length - 1) {
-          return cy
-            .request({ method: 'GET', url: `${API}/user/me`, failOnStatusCode: false })
-            .then(() => cy.getCookie('XSRF-TOKEN')) // pas de domain -> plus souple
-            .then((cookie) => {
-              const headers = cookie?.value ? { 'X-XSRF-TOKEN': cookie.value } : {};
-              return cy.request({
-                method: 'POST',
-                url: `${API}/auth/login`,
-                body: attempts[idx],
-                headers,
-                failOnStatusCode: false,
-              });
-            })
-            .then((res2) => {
-              if ([200, 201, 204].includes(res2.status)) return cy.wrap(res2);
-              throw new Error(
-                `Login API 401/403. Dernière réponse: ${res2.status} ${
-                  res2.body ? JSON.stringify(res2.body) : '(body vide)'
-                }`
-              );
-            });
-        }
-
-        // Essaie la forme suivante
-        return tryLogin(idx + 1);
-      });
-  };
-
-  return tryLogin()
+  return doLogin()
     .then((res) => {
-      // Si le back renvoie un token, on le place aussi dans localStorage
+      if ([200, 201, 204].includes(res.status)) return cy.wrap(res);
+
+      // Dernière chance : XSRF (rare mais on couvre)
+      return cy
+        .request({ method: 'GET', url: `${API}/user/me`, failOnStatusCode: false })
+        .then(() => cy.getCookie('XSRF-TOKEN'))
+        .then((cookie) => {
+          const headers = cookie?.value ? { 'X-XSRF-TOKEN': cookie.value } : {};
+          return cy.request({
+            method: 'POST',
+            url: `${API}/auth/login`,
+            body: { email: emailField, password },
+            headers,
+            failOnStatusCode: false,
+          });
+        })
+        .then((res2) => {
+          if ([200, 201, 204].includes(res2.status)) return cy.wrap(res2);
+          throw new Error(
+            `Login API ${res2.status}. ${
+              res2.body ? JSON.stringify(res2.body) : '(body vide)'
+            }`
+          );
+        });
+    })
+    .then((res) => {
+      // Si le back renvoie un token texte (non HttpOnly), aide optionnelle :
       const body = res.body;
       const token =
         (body && (body.token || body.accessToken || body.jwt)) ||
@@ -118,7 +106,9 @@ Cypress.Commands.add('loginProgrammatically', (email: string, password: string) 
       if (token) {
         cy.window({ log: false }).then((win) => {
           ['token', 'jwt', 'accessToken', 'authToken'].forEach((k) => {
-            try { win.localStorage.setItem(k, token); } catch {}
+            try {
+              win.localStorage.setItem(k, token);
+            } catch {}
           });
         });
       }

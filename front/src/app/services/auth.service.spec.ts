@@ -14,7 +14,6 @@ describe('AuthService', () => {
     http = TestBed.inject(HttpTestingController);
 
     // ⚠️ Le constructeur d’AuthService déclenche checkSession() -> 1 GET /user/me
-    // On instancie le service, puis on "flush" immédiatement cette requête initiale.
     svc = TestBed.inject(AuthService);
     const init = http.expectOne(`${environment.apiUrl}/user/me`);
     init.flush('NO', { status: 401, statusText: 'Unauthorized' }); // baseline: loggedIn=false
@@ -37,7 +36,7 @@ describe('AuthService', () => {
     expect(svc.isLoggedIn()).toBeTrue();
   });
 
-  it('register() should POST and set loggedIn=true', async () => {
+  it('register() should POST and NOT change login state', async () => {
     const payload: RegisterPayload = { email: 'a@a.tld', password: 'x', username: 'alice' };
 
     const p = firstValueFrom(svc.register(payload));
@@ -49,7 +48,8 @@ describe('AuthService', () => {
     req.flush('OK');
     await p;
 
-    expect(svc.isLoggedIn()).toBeTrue();
+    // ✅ pas d’auto-login après inscription
+    expect(svc.isLoggedIn()).toBeFalse();
   });
 
   it('checkSession() ok should set loggedIn=true', async () => {
@@ -78,27 +78,26 @@ describe('AuthService', () => {
 
   it('logout() error path should still force loggedIn=false and clear cookies', () => {
     const setCookieSpy = spyOnProperty(document, 'cookie', 'set');
-  
+
     svc.logout();
-  
+
     const req = http.expectOne(`${environment.apiUrl}/auth/logout`);
     expect(req.request.method).toBe('POST');
     req.flush('KO', { status: 500, statusText: 'Server Error' }); // ⬅️ force la branche error
-  
+
     expect(svc.isLoggedIn()).toBeFalse();
     expect(setCookieSpy).toHaveBeenCalledTimes(2);
   });
-  
+
   it('updateLoginStatus() should swallow errors (branch via catchError)', () => {
     // Appel interne à checkSession()
     svc.updateLoginStatus();
-  
+
     const req = http.expectOne(`${environment.apiUrl}/user/me`);
     expect(req.request.method).toBe('GET');
-    req.flush('NO', { status: 401, statusText: 'Unauthorized' }); // ⬅️ branche erreur de catchError dans updateLoginStatus()
-  
+    req.flush('NO', { status: 401, statusText: 'Unauthorized' }); // ⬅️ branche erreur de catchError
+
     // Pas d’exception propagée, état posé à false par tap()
     expect(svc.isLoggedIn()).toBeFalse();
   });
-  
 });

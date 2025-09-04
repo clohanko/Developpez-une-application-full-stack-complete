@@ -18,21 +18,22 @@ export interface RegisterPayload {
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private apiUrl = `${environment.apiUrl}/auth`;
-
-  // Valeur initiale = heuristique (dev non-HttpOnly). L'état fiable vient de checkSession().
   private loggedIn = new BehaviorSubject<boolean>(this.hasTokenCookie());
 
   constructor(private http: HttpClient) {
-    // Synchronise l'état dès le démarrage de l'app (utile après F5).
     this.checkSession()
       .pipe(catchError(() => of(false)))
-      .subscribe(); // pas d'erreur propagée
+      .subscribe();
   }
 
   /** ---- AUTH FLOWS ---- */
 
   login(credentials: LoginCredentials): Observable<string> {
-    return this.http.post(`${this.apiUrl}/login`, credentials, {
+    const payload = {
+      email: (credentials.email || '').trim().toLowerCase(),
+      password: credentials.password
+    };
+    return this.http.post(`${this.apiUrl}/login`, payload, {
       withCredentials: true,
       responseType: 'text',
     }).pipe(
@@ -41,24 +42,26 @@ export class AuthService {
   }
 
   register(data: RegisterPayload): Observable<string> {
-    return this.http.post(`${this.apiUrl}/register`, data, {
+    const payload = {
+      username: (data.username || '').trim(),
+      email: (data.email || '').trim().toLowerCase(),
+      password: data.password
+    };
+    return this.http.post(`${this.apiUrl}/register`, payload, {
       withCredentials: true,
       responseType: 'text',
-    }).pipe(
-      tap(() => this.loggedIn.next(true))
-    );
+    });
+    // ⬆️ on NE met PAS loggedIn à true ici : pas d’auto-login côté back
   }
 
   logout(): void {
     this.logoutFromServer().subscribe({
       next: () => {
         this.loggedIn.next(false);
-        // Purge éventuelle (dev) — le cookie HttpOnly est invalidé côté serveur
         document.cookie = 'jwt=; Max-Age=0; path=/';
         document.cookie = 'token=; Max-Age=0; path=/';
       },
       error: () => {
-        // Même si le serveur échoue, on force le logout côté client
         this.loggedIn.next(false);
         document.cookie = 'jwt=; Max-Age=0; path=/';
         document.cookie = 'token=; Max-Age=0; path=/';
@@ -76,17 +79,12 @@ export class AuthService {
     return this.loggedIn.asObservable();
   }
 
-  // Au lieu de lire document.cookie, on demande au serveur.
   updateLoginStatus(): void {
     this.checkSession()
       .pipe(catchError(() => of(false)))
       .subscribe();
   }
 
-  /**
-   * Ping /user/me pour savoir si la session est valide.
-   * Met à jour loggedIn et renvoie true/false.
-   */
   checkSession(): Observable<boolean> {
     return this.http.get(`${environment.apiUrl}/user/me`, { withCredentials: true }).pipe(
       map(() => true),
@@ -97,8 +95,6 @@ export class AuthService {
 
   /** ---- UTILS ---- */
 
-  // Heuristique uniquement utile si tu n'utilises PAS HttpOnly en dev.
-  // Ajuste le nom du cookie si besoin (jwt vs token).
   private hasTokenCookie(): boolean {
     return /(?:^|;\s*)(jwt|token)=/.test(document.cookie);
   }

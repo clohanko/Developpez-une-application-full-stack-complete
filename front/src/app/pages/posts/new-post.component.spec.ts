@@ -7,6 +7,8 @@ import { NewPostComponent } from './new-post.component';
 import { TopicService, Topic } from 'src/app/services/topic.service';
 import { PostService } from 'src/app/services/post.service';
 
+declare const expect: (actual: any) => jasmine.Matchers<any>;
+
 describe('NewPostComponent (branches)', () => {
   function setup(opts?: {
     topicsMode?: 'success' | 'error';

@@ -21,19 +21,22 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-@Import(TestSecurityConfig.class) // ← ajoute ceci
+@Import(TestSecurityConfig.class)
 class AuthControllerITTest {
 
     @Autowired MockMvc mvc;
     @Autowired ObjectMapper om;
 
     @org.springframework.boot.test.mock.mockito.MockBean
-    AuthService authService; // on mocke le service
+    AuthService authService;
 
     @Test
     void registerUser_returnsOk_withServiceMessage() throws Exception {
         RegisterRequest req = new RegisterRequest();
-        req.setUsername("seb"); req.setEmail("seb@example.com"); req.setPassword("secret123");
+        req.setUsername("seb");
+        req.setEmail("seb@example.com");
+        req.setPassword("Abcd1234!"); // ✅ mot de passe conforme (8+, maj, min, chiffre, spécial)
+
         when(authService.register(any(RegisterRequest.class))).thenReturn("Utilisateur enregistré");
 
         mvc.perform(post("/api/auth/register")

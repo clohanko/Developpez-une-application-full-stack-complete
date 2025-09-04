@@ -1,9 +1,11 @@
 {
-  "extends": "../tsconfig.json",
   "compilerOptions": {
-    "types": ["cypress"],
-    "lib": ["es2019", "dom", "dom.iterable"],
-    "strict": true
+    "strict": true,
+    "noEmit": true,
+    "lib": ["es2020", "dom"],
+    "types": ["cypress"],        
+    "allowJs": true
   },
-  "include": ["**/*.ts", "**/*.d.ts"]
+  "include": ["**/*.ts", "**/*.js", "**/*.d.ts"],
+  "exclude": ["../src/**/*", "../e2e/**/*"]
 }

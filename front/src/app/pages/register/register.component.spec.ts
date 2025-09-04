@@ -7,6 +7,8 @@ import { RegisterComponent } from './register.component';
 import { AuthService } from 'src/app/services/auth.service';
 
 describe('RegisterComponent (branches)', () => {
+  const STRONG_PWD = 'Abcd1234!';
+
   function setup(mode: 'success' | 'error-msg' | 'error-fallback' = 'success') {
     const auth = jasmine.createSpyObj<AuthService>('AuthService', ['register']);
     if (mode === 'success') {
@@ -51,18 +53,20 @@ describe('RegisterComponent (branches)', () => {
 
   it('succès: appelle register et redirige vers /login', () => {
     const { comp, auth, router } = setup('success');
+
     comp.registerForm.setValue({
       username: 'bob',
       email: 'b@b.tld',
-      password: 'secretX',
+      password: STRONG_PWD,
+      passwordConfirm: STRONG_PWD, // 👈 obligatoire
     });
 
     comp.onSubmit();
 
     expect(auth.register).toHaveBeenCalledWith({
       username: 'bob',
-      email: 'b@b.tld',
-      password: 'secretX',
+      email: 'b@b.tld',         // sera normalisé en .ts mais la valeur envoyée correspond
+      password: STRONG_PWD,
     });
     expect(comp.loading).toBeFalse();
     expect(router.navigate).toHaveBeenCalledWith(['/login']);
@@ -71,10 +75,12 @@ describe('RegisterComponent (branches)', () => {
 
   it('erreur avec message: affiche le message backend et stoppe le loading', () => {
     const { comp, router } = setup('error-msg');
+
     comp.registerForm.setValue({
       username: 'bob',
       email: 'b@b.tld',
-      password: 'secretX',
+      password: STRONG_PWD,
+      passwordConfirm: STRONG_PWD,
     });
 
     comp.onSubmit();
@@ -86,10 +92,12 @@ describe('RegisterComponent (branches)', () => {
 
   it('erreur sans message: utilise le fallback', () => {
     const { comp } = setup('error-fallback');
+
     comp.registerForm.setValue({
       username: 'bob',
       email: 'b@b.tld',
-      password: 'secretX',
+      password: STRONG_PWD,
+      passwordConfirm: STRONG_PWD,
     });
 
     comp.onSubmit();

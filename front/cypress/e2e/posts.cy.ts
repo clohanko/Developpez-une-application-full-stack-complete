@@ -4,8 +4,8 @@
 // Un seul timestamp pour toute la spec
 const TS = Date.now();
 const email = `e2e+${TS}@example.com`;
-const password = 'e2e-password-123';
-const username = `e2e-${TS}`;       // ⚠️ username unique, plus de "e2e-user" fixe
+const password = 'Abcd1234!'; 
+const username = `e2e-${TS}`;       
 
 before(() => {
   // Crée (ou ignore si déjà fait dans une relance) le même triplet (email, username, password)

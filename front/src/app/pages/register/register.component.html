@@ -10,19 +10,40 @@
       <span class="field__label">Nom d’utilisateur</span>
       <input class="field__input" type="text" formControlName="username" autocomplete="username" />
     </label>
+    <div class="error" *ngIf="f['username'].touched && f['username'].invalid">
+      Le nom d’utilisateur doit contenir au moins 3 caractères.
+    </div>
 
     <label class="field">
       <span class="field__label">Adresse e-mail</span>
       <input class="field__input" type="email" formControlName="email" autocomplete="email" />
     </label>
+    <div class="error" *ngIf="f['email'].touched && f['email'].invalid">
+      Veuillez saisir une adresse e-mail valide.
+    </div>
 
     <label class="field">
       <span class="field__label">Mot de passe</span>
       <input class="field__input" type="password" formControlName="password" autocomplete="new-password" />
     </label>
+    <div class="error" *ngIf="f['password'].touched && f['password'].invalid">
+      Le mot de passe doit contenir au moins 8 caractères dont une majuscule, une minuscule,
+      un chiffre et un caractère spécial.
+    </div>
+
+    <label class="field">
+      <span class="field__label">Confirmer le mot de passe</span>
+      <input class="field__input" type="password" formControlName="passwordConfirm" autocomplete="new-password" />
+    </label>
+    <div class="error" *ngIf="registerForm.touched && registerForm.errors?.['passwordMismatch']">
+      Les mots de passe ne correspondent pas.
+    </div>
 
     <button class="btn btn--primary" type="submit" [disabled]="registerForm.invalid || loading">
       {{ loading ? "Création…" : "S’inscrire" }}
     </button>
+
+    <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+    <p class="success" *ngIf="successMessage">{{ successMessage }}</p>
   </form>
 </section>

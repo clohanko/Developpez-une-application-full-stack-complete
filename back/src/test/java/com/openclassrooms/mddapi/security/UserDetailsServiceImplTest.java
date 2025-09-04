@@ -23,28 +23,58 @@ class UserDetailsServiceImplTest {
     @InjectMocks UserDetailsServiceImpl service;
 
     @Test
-    void loadUserByUsername_returnsDetails_whenUserExists() {
+    void loadUserByUsername_returnsDetails_whenUserExists_byEmail_ignoreCase() {
+        // arrange
         User u = new User();
         u.setEmail("seb@example.com");
         u.setUsername("seb");
         u.setPassword("HASH");
-        when(userRepository.findByEmail("seb@example.com")).thenReturn(Optional.of(u));
 
-        UserDetails details = service.loadUserByUsername("seb@example.com");
+        when(userRepository.findByEmailIgnoreCase("Seb@Example.com")).thenReturn(Optional.of(u));
 
+        // act
+        UserDetails details = service.loadUserByUsername("Seb@Example.com");
+
+        // assert
         assertThat(details.getUsername()).isEqualTo("seb@example.com");
         assertThat(details.getPassword()).isEqualTo("HASH");
-        verify(userRepository).findByEmail("seb@example.com");
+        verify(userRepository).findByEmailIgnoreCase("Seb@Example.com");
+        verify(userRepository, never()).findByUsernameIgnoreCase(any());
+    }
+
+    @Test
+    void loadUserByUsername_returnsDetails_whenUserExists_byUsername_ignoreCase() {
+        // arrange
+        User u = new User();
+        u.setEmail("seb@example.com");
+        u.setUsername("seb");
+        u.setPassword("HASH");
+
+        when(userRepository.findByEmailIgnoreCase("SeB")).thenReturn(Optional.empty());
+        when(userRepository.findByUsernameIgnoreCase("SeB")).thenReturn(Optional.of(u));
+
+        // act
+        UserDetails details = service.loadUserByUsername("SeB");
+
+        // assert
+        assertThat(details.getUsername()).isEqualTo("seb@example.com");
+        assertThat(details.getPassword()).isEqualTo("HASH");
+        verify(userRepository).findByEmailIgnoreCase("SeB");
+        verify(userRepository).findByUsernameIgnoreCase("SeB");
     }
 
     @Test
     void loadUserByUsername_throws_whenMissing() {
-        when(userRepository.findByEmail("missing@example.com")).thenReturn(Optional.empty());
+        // arrange
+        when(userRepository.findByEmailIgnoreCase("missing@example.com")).thenReturn(Optional.empty());
+        when(userRepository.findByUsernameIgnoreCase("missing@example.com")).thenReturn(Optional.empty());
 
+        // act + assert
         assertThatThrownBy(() -> service.loadUserByUsername("missing@example.com"))
                 .isInstanceOf(UsernameNotFoundException.class)
                 .hasMessageContaining("Aucun utilisateur");
 
-        verify(userRepository).findByEmail("missing@example.com");
+        verify(userRepository).findByEmailIgnoreCase("missing@example.com");
+        verify(userRepository).findByUsernameIgnoreCase("missing@example.com");
     }
 }

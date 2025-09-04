@@ -10,14 +10,40 @@
       <span class="field__label">E-mail ou nom d’utilisateur</span>
       <input class="field__input" type="text" formControlName="email" autocomplete="username" />
     </label>
+    <div class="error" *ngIf="loginForm.get('email')?.touched && loginForm.get('email')?.errors">
+      <ng-container *ngIf="loginForm.get('email')?.errors?.['required']">
+        Ce champ est requis.
+      </ng-container>
+      <ng-container *ngIf="loginForm.get('email')?.errors?.['email']">
+        Veuillez saisir une adresse e-mail valide.
+      </ng-container>
+      <ng-container *ngIf="loginForm.get('email')?.errors?.['username']">
+        Saisissez un nom d’utilisateur valide (3–50 caractères, lettres/chiffres/._-).
+      </ng-container>
+      <!-- message d'erreur renvoyé par le back pour le champ -->
+      <ng-container *ngIf="loginForm.get('email')?.errors?.['api']">
+        {{ loginForm.get('email')?.errors?.['api'] }}
+      </ng-container>
+    </div>
 
     <label class="field">
       <span class="field__label">Mot de passe</span>
       <input class="field__input" type="password" formControlName="password" autocomplete="current-password" />
     </label>
+    <div class="error" *ngIf="loginForm.get('password')?.touched && loginForm.get('password')?.invalid">
+      <ng-container *ngIf="loginForm.get('password')?.errors?.['required']">
+        Mot de passe requis.
+      </ng-container>
+      <!-- message d'erreur renvoyé par le back pour le champ -->
+      <ng-container *ngIf="loginForm.get('password')?.errors?.['api']">
+        {{ loginForm.get('password')?.errors?.['api'] }}
+      </ng-container>
+    </div>
 
     <button class="btn btn--primary" type="submit" [disabled]="loginForm.invalid || loading">
       {{ loading ? "Connexion…" : "Se connecter" }}
     </button>
+
+    <p class="error" *ngIf="error">{{ error }}</p>
   </form>
 </section>

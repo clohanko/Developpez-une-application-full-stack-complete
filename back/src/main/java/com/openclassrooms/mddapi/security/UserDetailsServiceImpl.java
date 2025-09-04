@@ -13,11 +13,13 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     private UserRepository userRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        System.out.println("Chargement de l'utilisateur avec l'email : " + email);
-
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("Aucun utilisateur trouvé avec l'email : " + email));
+    public UserDetails loadUserByUsername(String identifier) throws UsernameNotFoundException {
+        final String login = identifier == null ? "" : identifier.trim();
+// Throw exception ici
+        User user = userRepository.findByEmailIgnoreCase(login)
+                .or(() -> userRepository.findByUsernameIgnoreCase(login))
+                .orElseThrow(() ->
+                        new UsernameNotFoundException("Aucun utilisateur trouvé avec l’identifiant : " + login));
 
         return new UserDetailsImpl(user);
     }
